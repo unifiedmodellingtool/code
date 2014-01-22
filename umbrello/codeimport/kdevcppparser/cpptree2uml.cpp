@@ -565,7 +565,7 @@ QString CppTree2Uml::typeOfDeclaration(TypeSpecifierAST* typeSpec, DeclaratorAST
 
     QList<AST*> arrays = declarator->arrayDimensionList();
     for(int i = 0; i < arrays.size(); ++i) {
-        text += "[]";
+        text += arrays.at(i)->text().replace(" ", "");
     }
 
     return text;
