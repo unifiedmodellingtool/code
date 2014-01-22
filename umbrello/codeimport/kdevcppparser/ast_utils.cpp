@@ -123,12 +123,12 @@ QString declaratorToString(DeclaratorAST* declarator, const QString& scope, bool
 
    if(declarator->declaratorId())
        text += declarator->declaratorId()->text();
-
+/*
    QList<AST*> arrays = declarator->arrayDimensionList();
    for(int i = 0; i < arrays.size(); ++i) {
        text += "[]";
    }
-
+*/
    if(declarator->parameterDeclarationClause()){
        text += "(";
 
