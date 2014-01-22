@@ -526,6 +526,11 @@ void CppWriter::writeAttributeDecls (UMLClassifier *c, Uml::Visibility::Enum vis
 
             QString staticValue = at->isStatic() ? "static " : "";
             QString typeName = fixTypeName(at->getTypeName());
+            int i = typeName.indexOf('[');
+            if (i > -1) {
+                varName += typeName.mid(i);
+                typeName = typeName.left(i);
+            }
             if(!documentation.isEmpty())
                 writeComment(documentation, indent(), stream);
             stream << indent() << staticValue << typeName << " " << varName << ";" << m_endl;
@@ -921,6 +926,13 @@ void CppWriter::writeSingleAttributeAccessorMethods(
     QString className = fixTypeName(fieldClassName);
     QString fldName = Codegen_Utils::capitalizeFirstLetter(fieldName);
     QString indnt = indent();
+    QString varName = "new_var";
+
+    int i = className.indexOf('[');
+    if (i > -1) {
+        varName += className.mid(i);
+        className = className.left(i);
+    }
 
     // set method
     if (change == Uml::Changeability::Changeable && !isStatic) {
@@ -928,7 +940,7 @@ void CppWriter::writeSingleAttributeAccessorMethods(
         stream << indnt << "void ";
         if(!isHeaderMethod)
             stream << className_ << "::";
-        stream << "set" << fldName << " (" << className << " new_var)";
+        stream << "set" << fldName << " (" << className << " " << varName << ")";
 
         if (writeMethodBody) {
             stream << indnt << " {" << m_endl;
@@ -942,6 +954,9 @@ void CppWriter::writeSingleAttributeAccessorMethods(
         } else
             stream << ";" << m_endl;
     }
+
+    if (i)
+        className += "*";
 
     // get method
     writeDocumentation("Get the value of " + fieldVarName, description, policyExt()->getDocToolTag() + "return the value of " + fieldVarName, stream);
@@ -1185,7 +1200,14 @@ void CppWriter::writeOperations(UMLClassifier *c, UMLOperationList &oplist, bool
             UMLAttribute* at = atlIt.next();
             QString typeName = fixTypeName(at->getTypeName());
             QString atName = cleanName(at->name());
-            str += typeName + ' ' + atName;
+            QString atNameType = atName;
+
+            int i = typeName.indexOf('[');
+            if (i > -1) {
+                atNameType += typeName.mid(i);
+                typeName = typeName.left(i);
+            }
+            str += typeName + ' ' + atNameType;
             const QString initVal = at->getInitialValue();
             if (! initVal.isEmpty())
                 str += " = " + initVal;
