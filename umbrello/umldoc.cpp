@@ -44,6 +44,7 @@
 #include "umlscene.h"
 #include "version.h"
 #include "worktoolbar.h"
+#include "stereotypesmodel.h"
 
 // kde includes
 #include <kio/job.h>
@@ -90,7 +91,8 @@ UMLDoc::UMLDoc()
     m_nViewID(Uml::ID::None),
     m_bTypesAreResolved(true),
     m_pCurrentRoot(0),
-    m_bClosing(false)
+    m_bClosing(false),
+    m_stereotypesModel(new StereotypesModel(&m_stereoList))
 {
 }
 
@@ -148,6 +150,7 @@ void UMLDoc::createDatatypeFolder()
  */
 UMLDoc::~UMLDoc()
 {
+    delete m_stereotypesModel;
     delete m_datatypeRoot;
     delete m_pChangeLog;
 }
@@ -352,7 +355,7 @@ void UMLDoc::closeDocument()
         if (stereotypes().count() > 0) {
             foreach(UMLStereotype *s, m_stereoList) {
                 if (s->refCount() == 0) {
-                    m_stereoList.removeAll(s);
+                    m_stereotypesModel->removeStereotype(s);
                     delete s;
                 }
             }
@@ -1058,9 +1061,8 @@ UMLStereotype * UMLDoc::findStereotypeById(Uml::ID::Type id)
  */
 void UMLDoc::addStereotype(UMLStereotype *s)
 {
-    if (! m_stereoList.contains(s)) {
-        m_stereoList.append(s);
-    }
+    if (m_stereotypesModel->addStereotype(s))
+        emit sigObjectCreated(s);
 }
 
 /**
@@ -1069,9 +1071,8 @@ void UMLDoc::addStereotype(UMLStereotype *s)
  */
 void UMLDoc::removeStereotype(UMLStereotype *s)
 {
-    if (m_stereoList.contains(s)) {
-        m_stereoList.removeAll(s);
-    }
+    if (m_stereotypesModel->removeStereotype(s))
+        emit sigObjectRemoved(s);
 }
 
 /**
@@ -2195,6 +2196,11 @@ void UMLDoc::resolveTypes()
     }
     m_bTypesAreResolved = true;
     qApp->processEvents();  // give UI events a chance
+}
+
+StereotypesModel *UMLDoc::stereotypesModel()
+{
+    return m_stereotypesModel;
 }
 
 /**

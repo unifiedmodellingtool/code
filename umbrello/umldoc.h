@@ -41,6 +41,7 @@ class QDomElement;
 class QPrinter;
 
 class IDChangeLog;
+class StereotypesModel;
 class UMLPackage;
 class UMLFolder;
 class DiagramPrintPage;
@@ -219,6 +220,8 @@ public:
 
     void resolveTypes();
 
+    StereotypesModel *stereotypesModel();
+
 private:
     void initSaveTimer();
     void createDatatypeFolder();
@@ -290,6 +293,8 @@ private:
      * True while closeDocument() is executing.
      */
     bool m_bClosing;
+
+    StereotypesModel *m_stereotypesModel;
 
 public slots:
     void slotRemoveUMLObject(UMLObject*o);

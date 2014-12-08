@@ -15,8 +15,11 @@
 #include "finddialog.h"
 #include "findresults.h"
 #include "uml.h"
+#include "stereotypeswindow.h"
 
 // kde includes
+#include <KActionCollection>
+#include <KToggleAction>
 #include <ktexteditor/configinterface.h>
 #include <ktexteditor/document.h>
 #include <ktexteditor/editor.h>
@@ -41,16 +44,18 @@ class UMLAppPrivate : public QObject
 {
     Q_OBJECT
 public:
-    QWidget *parent;
+    UMLApp *parent;
     FindDialog findDialog;
     FindResults findResults;
     QListWidget *logWindow;         ///< Logging window.
+    KToggleAction *viewStereotypesWindow;
+    StereotypesWindow *stereotypesWindow;
 
     KTextEditor::Editor *editor;
     KTextEditor::View *view;
     KTextEditor::Document *document;
 
-    explicit UMLAppPrivate(QWidget *_parent)
+    explicit UMLAppPrivate(UMLApp *_parent)
       : parent(_parent),
         findDialog(_parent),
         view(0),
@@ -85,6 +90,28 @@ public slots:
         dialog->exec();
         delete dialog;
         delete document;
+    }
+
+    void createDockWindows()
+    {
+        stereotypesWindow = new StereotypesWindow(parent);
+        parent->addDockWidget(Qt::RightDockWidgetArea, stereotypesWindow);
+    }
+
+    void createActions()
+    {
+        viewStereotypesWindow = parent->actionCollection()->add<KToggleAction>(QLatin1String("view_show_stereotypes"));
+        viewStereotypesWindow->setText(i18n("Stereotypes"));
+        // TODO: we would be able to drop slotShowStereotypes() in favor of using the following connection
+        // Unfortunally stereotypesWindow is created after the related action which results into a segmentation fault.
+        //connect(viewStereotypesWindow, SIGNAL(triggered(bool)), stereotypesWindow, SLOT(setVisible(bool)));
+        connect(viewStereotypesWindow, SIGNAL(triggered(bool)), this, SLOT(slotShowStereotypes(bool)));
+    }
+
+    void slotShowStereotypes(bool state)
+    {
+        stereotypesWindow->setVisible(state);
+        viewStereotypesWindow->setChecked(state);
     }
 };
 

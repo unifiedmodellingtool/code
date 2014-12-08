@@ -425,6 +425,7 @@ set(libumbrello_SRCS
     main.cpp
     model_utils.cpp
     node.cpp
+    stereotypeswindow.cpp
     object_factory.cpp
     operation.cpp
     optionstate.cpp
