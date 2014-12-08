@@ -472,11 +472,6 @@ void UMLObject::setUMLStereotype(UMLStereotype *stereo)
     }
     if (m_pStereotype) {
         m_pStereotype->decrRefCount();
-        if (m_pStereotype->refCount() == 0) {
-            UMLDoc *pDoc = UMLApp::app()->document();
-            pDoc->removeStereotype(m_pStereotype);
-            delete m_pStereotype;
-        }
     }
     m_pStereotype = stereo;
     // TODO: don't emit modified() if predefined folder
