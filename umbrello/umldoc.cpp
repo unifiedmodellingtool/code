@@ -348,14 +348,15 @@ void UMLDoc::closeDocument()
         createDatatypeFolder();
         // this creates to much items only Logical View should be created
         listView->init();
-        /* Remove any stereotypes.
-        if (m_stereoList.count() > 0) {
-            UMLStereotype *s;
-            for (UMLStereotypeListIt sit(m_stereoList); (s = sit.current()) != 0; ++sit)
-                delete s;
-            m_stereoList.clear();
+        // Remove any unused stereotypes.
+        if (stereotypes().count() > 0) {
+            foreach(UMLStereotype *s, m_stereoList) {
+                if (s->refCount() == 0) {
+                    m_stereoList.removeAll(s);
+                    delete s;
+                }
+            }
         }
-        */
     }
     m_bClosing = false;
 }

@@ -54,6 +54,7 @@ UMLStereotype::UMLStereotype()
  */
 UMLStereotype::~UMLStereotype()
 {
+    Q_ASSERT(m_refCount == 0);
 }
 
 /**

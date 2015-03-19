@@ -89,6 +89,8 @@ UMLObject::UMLObject(UMLObject * parent)
  */
 UMLObject::~UMLObject()
 {
+    if (m_pStereotype)
+        m_pStereotype->decrRefCount();
 }
 
 /**
@@ -287,6 +289,7 @@ void UMLObject::copyInto(UMLObject *lhs) const
     // Data members with copy constructor
     lhs->m_Doc = m_Doc;
     lhs->m_pStereotype = m_pStereotype;
+    m_pStereotype->incrRefCount();
     lhs->m_bAbstract = m_bAbstract;
     lhs->m_bStatic = m_bStatic;
     lhs->m_BaseType = m_BaseType;
@@ -714,6 +717,8 @@ bool UMLObject::resolveRef()
         m_pSecondary = pDoc->findObjectById(Uml::ID::fromString(m_SecondaryId));
         if (m_pSecondary != NULL) {
             if (m_pSecondary->baseType() == ot_Stereotype) {
+                if (m_pStereotype)
+                    m_pStereotype->decrRefCount();
                 m_pStereotype = dynamic_cast<UMLStereotype*>(m_pSecondary.data());
                 m_pStereotype->incrRefCount();
                 m_pSecondary = NULL;
@@ -887,6 +892,8 @@ bool UMLObject::loadStereotype(QDomElement & element)
         return false;
     Uml::ID::Type stereoID = Uml::ID::fromString(stereo);
     UMLDoc *pDoc = UMLApp::app()->document();
+    if (m_pStereotype)
+        m_pStereotype->decrRefCount();
     m_pStereotype = pDoc->findStereotypeById(stereoID);
     if (m_pStereotype)
         m_pStereotype->incrRefCount();
@@ -978,6 +985,8 @@ bool UMLObject::loadFromXMI(QDomElement & element)
     QString stereo = element.attribute(QLatin1String("stereotype"));
     if (!stereo.isEmpty()) {
         Uml::ID::Type stereoID = Uml::ID::fromString(stereo);
+        if (m_pStereotype)
+            m_pStereotype->decrRefCount();
         m_pStereotype = umldoc->findStereotypeById(stereoID);
         if (m_pStereotype) {
             m_pStereotype->incrRefCount();
