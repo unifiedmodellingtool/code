@@ -102,6 +102,50 @@ UMLDoc::UMLDoc()
  */
 void UMLDoc::init()
 {
+    createFolders();
+    createDatatypeFolder();
+
+    // Connect signals.
+    UMLApp * pApp = UMLApp::app();
+    connect(this, SIGNAL(sigDiagramCreated(Uml::ID::Type)), pApp, SLOT(slotUpdateViews()));
+    connect(this, SIGNAL(sigDiagramRemoved(Uml::ID::Type)), pApp, SLOT(slotUpdateViews()));
+    connect(this, SIGNAL(sigDiagramRenamed(Uml::ID::Type)), pApp, SLOT(slotUpdateViews()));
+    connect(this, SIGNAL(sigCurrentViewChanged()),          pApp, SLOT(slotCurrentViewChanged()));
+}
+
+
+/**
+ * Remove data type folder from logical view folder and delete it
+ */
+void UMLDoc::removeDatatypeFolder()
+{
+    m_root[Uml::ModelType::Logical]->removeObject(m_datatypeRoot);
+    m_datatypeRoot->removeAllObjects();
+    delete m_datatypeRoot;
+    m_datatypeRoot = 0;
+}
+
+/**
+ * Create the datatype folder and add it to the logical folder.
+ */
+void UMLDoc::createDatatypeFolder()
+{
+    m_datatypeRoot = new UMLFolder(QLatin1String("Datatypes"), "Datatypes");
+    m_datatypeRoot->setLocalName(i18n("Datatypes"));
+    m_datatypeRoot->setUMLPackage(m_root[Uml::ModelType::Logical]);
+    Q_ASSERT(m_root[Uml::ModelType::Logical]);
+    m_root[Uml::ModelType::Logical]->addObject(m_datatypeRoot);
+}
+
+void UMLDoc::removeFolders()
+{
+    for (int i = 0; i < Uml::ModelType::N_MODELTYPES; ++i) {
+        delete m_root[i];
+    }
+}
+
+void UMLDoc::createFolders()
+{
     // Initialize predefined folders.
     const char* nativeRootName[Uml::ModelType::N_MODELTYPES] = {
         "Logical View",
@@ -117,32 +161,12 @@ void UMLDoc::init()
         i18n("Deployment View"),
         i18n("Entity Relationship Model")
     };
+
     for (int i = 0; i < Uml::ModelType::N_MODELTYPES; ++i) {
         const QString rootName = QString::fromLatin1(nativeRootName[i]);
         m_root[i] = new UMLFolder(rootName, Uml::ID::fromString(rootName));
         m_root[i]->setLocalName(localizedRootName[i]);
     }
-    createDatatypeFolder();
-
-    // Connect signals.
-    UMLApp * pApp = UMLApp::app();
-    connect(this, SIGNAL(sigDiagramCreated(Uml::ID::Type)), pApp, SLOT(slotUpdateViews()));
-    connect(this, SIGNAL(sigDiagramRemoved(Uml::ID::Type)), pApp, SLOT(slotUpdateViews()));
-    connect(this, SIGNAL(sigDiagramRenamed(Uml::ID::Type)), pApp, SLOT(slotUpdateViews()));
-    connect(this, SIGNAL(sigCurrentViewChanged()),          pApp, SLOT(slotCurrentViewChanged()));
-}
-
-/**
- * Create the datatype folder and add it to the logical folder.
- */
-void UMLDoc::createDatatypeFolder()
-{
-    delete m_datatypeRoot;
-    m_datatypeRoot = new UMLFolder(QLatin1String("Datatypes"), "Datatypes");
-    m_datatypeRoot->setLocalName(i18n("Datatypes"));
-    m_datatypeRoot->setUMLPackage(m_root[Uml::ModelType::Logical]);
-    Q_ASSERT(m_root[Uml::ModelType::Logical]);
-    m_root[Uml::ModelType::Logical]->addObject(m_datatypeRoot);
 }
 
 /**
@@ -343,14 +367,14 @@ void UMLDoc::closeDocument()
         //      addToUndoStack().
         removeAllViews();
         m_bLoading = m_bLoading_old;
+
+        removeDatatypeFolder();
+
         // Remove all objects from the predefined folders.
         // @fixme With advanced code generation enabled, this crashes.
         removeAllObjects();
+        removeFolders();
 
-        // Restore the datatype folder, it has been deleted above.
-        createDatatypeFolder();
-        // this creates to much items only Logical View should be created
-        listView->init();
         // Remove any unused stereotypes.
         if (stereotypes().count() > 0) {
             foreach(UMLStereotype *s, m_stereoList) {
@@ -372,6 +396,12 @@ void UMLDoc::closeDocument()
 bool UMLDoc::newDocument()
 {
     closeDocument();
+
+    createFolders();
+    createDatatypeFolder();
+    // this creates to much items only Logical View should be created
+    UMLListView *listView = UMLApp::app()->listView();
+    listView->init();
     UMLApp::app()->setCurrentView(0);
     m_doc_url.setFileName(i18n("Untitled"));
     //see if we need to start with a new diagram
@@ -414,6 +444,14 @@ bool UMLDoc::openDocument(const KUrl& url, const char* format /* =0 */)
 
     m_doc_url = url;
     closeDocument();
+
+    createFolders();
+    createDatatypeFolder();
+
+    // this creates to much items only Logical View should be created
+    UMLListView *listView = UMLApp::app()->listView();
+    listView->init();
+
     // IMPORTANT: set m_bLoading to true
     // _AFTER_ the call of UMLDoc::closeDocument()
     // as it sets m_bLoading to false after it was temporarily
@@ -2536,8 +2574,6 @@ void UMLDoc::removeAllViews()
  */
 void UMLDoc::removeAllObjects()
 {
-    m_root[Uml::ModelType::Logical]->removeObject(m_datatypeRoot);
-
     for (int i = 0; i < Uml::ModelType::N_MODELTYPES; ++i) {
         m_root[i]->removeAllObjects();
     }
