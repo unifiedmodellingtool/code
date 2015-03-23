@@ -715,7 +715,8 @@ bool UMLObject::resolveRef()
                 if (m_pStereotype)
                     m_pStereotype->decrRefCount();
                 m_pStereotype = dynamic_cast<UMLStereotype*>(m_pSecondary.data());
-                m_pStereotype->incrRefCount();
+                if (m_pStereotype)
+                    m_pStereotype->incrRefCount();
                 m_pSecondary = NULL;
             }
             m_SecondaryId = QString();
