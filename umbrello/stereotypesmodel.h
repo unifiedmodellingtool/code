@@ -167,6 +167,16 @@ public:
         emit dataChanged(mi, mi);
     }
 
+    /**
+     * Emit data changed signal for a stereotype instance.
+     * @param instance
+     */
+    void emitDataChanged(UMLStereotype *stereotype)
+    {
+        int index = m_stereotypes->indexOf(stereotype);
+        emitDataChanged(index);
+    }
+
 protected:
     UMLStereotypeList *m_stereotypes;
 };
