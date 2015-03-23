@@ -3037,9 +3037,11 @@ void UMLApp::setCurrentView(UMLView* view, bool updateTreeView)
     setZoom(view->zoom());
     slotStatusMsg(view->umlScene()->name());
     if (updateTreeView) {
-        UMLListViewItem* lvitem = m_listView->findView(view);
-        if (lvitem) {
-            m_listView->setCurrentItem(lvitem);
+        if (m_listView) {
+            UMLListViewItem* lvitem = m_listView->findView(view);
+            if (lvitem) {
+                m_listView->setCurrentItem(lvitem);
+            }
         }
     }
     DEBUG(DBG_SRC) << "Changed view to" << view->umlScene();

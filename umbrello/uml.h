@@ -17,6 +17,8 @@
 #include <kurl.h>
 #include <ksharedconfig.h>
 
+#include <QPointer>
+
 // forward declaration of the UML classes
 class BirdView;
 class BirdViewDockWidget;
@@ -360,7 +362,7 @@ private:
      */
     UMLDoc* m_doc;
 
-    UMLListView* m_listView;  ///< Listview shows the current open file.
+    QPointer<UMLListView> m_listView;  ///< Listview shows the current open file.
 
     QDockWidget* m_mainDock;           ///< The widget which shows the diagrams.
     QDockWidget* m_listDock;           ///< Contains the UMLListView tree view.
