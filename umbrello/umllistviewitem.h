@@ -18,6 +18,7 @@
 #include <QDomElement>
 #include <QMap>
 #include <QTreeWidget>
+#include <QPointer>
 
 // forward declarations
 class UMLListView;
@@ -160,7 +161,7 @@ protected:
 
     ListViewType       m_type;
     Uml::ID::Type      m_id;
-    UMLObject *        m_object;
+    QPointer<UMLObject> m_object;
     QString            m_label;
     ChildObjectMap     m_comap;
 
