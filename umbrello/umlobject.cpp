@@ -91,6 +91,10 @@ UMLObject::~UMLObject()
 {
     // unref stereotype
     setUMLStereotype(0);
+    if (m_pSecondary && m_pSecondary->baseType() == ot_Stereotype) {
+        UMLStereotype* stereotype = dynamic_cast<UMLStereotype*>(m_pSecondary.data());
+        stereotype->decrRefCount();
+    }
 }
 
 /**
@@ -289,7 +293,8 @@ void UMLObject::copyInto(UMLObject *lhs) const
     // Data members with copy constructor
     lhs->m_Doc = m_Doc;
     lhs->m_pStereotype = m_pStereotype;
-    m_pStereotype->incrRefCount();
+    if (lhs->m_pStereotype)
+        lhs->m_pStereotype->incrRefCount();
     lhs->m_bAbstract = m_bAbstract;
     lhs->m_bStatic = m_bStatic;
     lhs->m_BaseType = m_BaseType;
