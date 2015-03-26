@@ -206,6 +206,7 @@ public:
 
     void addDefaultDatatypes();
     void createDatatype(const QString &name);
+    void removeDatatypes();
 
     UMLStereotype *createStereotype(const QString &name);
     UMLStereotype *findStereotype(const QString &name);

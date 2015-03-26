@@ -369,6 +369,7 @@ void UMLDoc::closeDocument()
         m_bLoading = m_bLoading_old;
 
         removeDatatypeFolder();
+        removeDatatypes();
 
         // Remove all objects from the predefined folders.
         // @fixme With advanced code generation enabled, this crashes.
@@ -3075,6 +3076,17 @@ void UMLDoc::createDatatype(const QString &name)
     }
 }
 
+/**
+ * Remove objects in datatype folder.
+ */
+void UMLDoc::removeDatatypes()
+{
+    UMLObjectList datatypes = m_datatypeRoot->containedObjects();
+    foreach(UMLObject *datatype, datatypes) {
+        m_datatypeRoot->containedObjects().removeAll(datatype);
+        delete datatype;
+    }
+}
 /**
  * Make a popup menu for the tabs
  * signalled from tabWidget's contextMenu().
