@@ -126,12 +126,13 @@ void UMLStereotypeWidget::insertItems(UMLStereotype *type)
     m_comboBox->clear();
     m_comboBox->addItem(QLatin1String(""), QVariant(0));
     foreach(const QString &key, types.keys()) {
-        m_comboBox->addItem(key, QVariant::fromValue((types[key])));
+        QString s = QString(QLatin1String("%1 (%2)")).arg(key).arg(types[key]->refCount());
+        m_comboBox->addItem(s, QVariant::fromValue((types[key])));
     }
 
     // select the given parameter
     if (type) {
-        int currentIndex = m_comboBox->findText(type->name());
+        int currentIndex = m_comboBox->findText(type->name(), Qt::MatchStartsWith);
         if (currentIndex > -1) {
             m_comboBox->setCurrentIndex(currentIndex);
         }
